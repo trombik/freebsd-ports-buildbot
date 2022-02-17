@@ -41,6 +41,17 @@ SUB_LIST=	PYTHON_CMD=${PYTHON_CMD} PYTHON_VER=${PYTHON_VER}
 
 NO_ARCH=	yes
 
+# the directory was removed, but MANIFEST.in still references it
+# https://github.com/buildbot/buildbot/commit/9251a994e7ba5f8ab9e678b49920bdc38cd52b3d
+BUILDBOT_REMOVE_ME= ${PYTHONPREFIX_SITELIBDIR:S;${PREFIX}/;;}/buildbot/reporters/templates
+POST_PLIST+=	fix-plist
+
+fix-plist:
+	${REINPLACE_CMD} -e 's|^${BUILDBOT_REMOVE_ME}$$||' ${TMPPLIST}
+
+post-install:
+	${RM} -r ${STAGEDIR}${PYTHONPREFIX_SITELIBDIR}/buildbot/reporters/templates
+
 do-test:
 	@cd ${WRKSRC} && PYTHONPATH=${WRKSRC} TZ=UTC ${LOCALBASE}/bin/trial-${PYTHON_VER} buildbot
 
